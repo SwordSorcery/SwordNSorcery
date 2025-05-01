@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongodb:
+    image: mongo:latest
+    container_name: sas-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=sword-and-sorcery
+    networks:
+      - sas-network
+
+  # Backend API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: sas-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/sword-and-sorcery
+      - JWT_SECRET=development-jwt-secret
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+      - CLIENT_URL=http://localhost:5173
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - sas-network
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: sas-client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    environment:
+      - VITE_API_URL=http://localhost:3001/api
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - sas-network
+
+networks:
+  sas-network:
+    driver: bridge
+
+volumes:
+  mongodb-data: 
