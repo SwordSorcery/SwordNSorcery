@@ -68,7 +68,7 @@ Sword and Sorcery is built on a three-tier architecture:
 1. Clone the repository:
 ```bash
 git clone https://github.com/SwordSorcery/SwordNSorcery.git
-cd sword-and-sorcery
+cd SwordNSorcery
 ```
 
 2. Install dependencies:
